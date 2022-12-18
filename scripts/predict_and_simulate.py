@@ -18,21 +18,14 @@ NOTE
 3. Variable order in "baseline" sheet should be identical to that in the "Inputs" sheet of 
    the config file to generate_dataset_template.py
 
-python C:\Users\cwu\Desktop\Software\Aspen_automation\Scripts\AutoAspen2\predict_and_simulate.py
+Usage
+python path\to\predict_and_simulate.py
 '''
 
 
-OUT_DIR = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_3_FT\simulation\poly\n=500000'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_2_HEFA\simulation\lsvm\n=500000'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_1_cellulosic\simulation\poly\n=500000'
-CONFIG_FILE = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_3_FT\config_500000.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_2_HEFA\config_500000.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_1_cellulosic\config_500000.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\FY2022_Q4\HEFA\config.xlsx'
-MODEL_FILE = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_3_FT\training\poly\poly.mod'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_2_HEFA\training\lsvm\lsvm.mod'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_1_cellulosic\training\poly\poly.mod'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\FY2022_Q4\HEFA\training\poly\poly.mod'
+OUT_DIR = 'path\to\simulation\mlmethod'
+CONFIG_FILE = 'path\to\config.xlsx'
+MODEL_FILE = 'path\to\training\mlmethod\mlmethod.mod'
 LABEL = 'MFSP (\$ GGE$^{-1}$)'
 
 
