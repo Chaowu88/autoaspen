@@ -11,19 +11,14 @@ This script generates training dataset using Aspen model and .xslm calculator.
 If excel raise an error, try run the script again first. If no success, delete the inputs of the run in Values column,
 and try again.
 
-python C:\Users\cwu\Desktop\Software\Aspen_automation\Scripts\AutoAspen2\generate_dataset.py
+Usage
+python path\to\generate_dataset.py
 '''
 
 
-DATASET_FILE = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_3_FT\training\training_data.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_2_HEFA\training\training_data.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_1_cellulosic\training\training_data.xlsx'
-ASPEN_FILE = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_3_FT\Case_3.1.0-FT_from_Wood-2.5.2020_v31-2000_TPD.bkp'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_2_HEFA\HRJ-YellowGrease_Oils_200-Mile.bkp'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_1_cellulosic\Cellulosic_ETJ_v9b.bkp'
-CALCULATOR_FILE = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_3_FT\Case_3.1.0-FT_from_Wood-2.5.2020_v30-2000_TPD.xlsm'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_2_HEFA\HRJ-YellowGrease_Oils_200-Mile.xlsm'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_1_cellulosic\Cellulosic_ETJ_v9b.xlsm'
+DATASET_FILE = 'path\to\training\training_data.xlsx'
+ASPEN_FILE = 'path\to\aspenmodel.bkp'
+CALCULATOR_FILE = 'path\to\excel_calculator.xlsm'
 
 
 import os
