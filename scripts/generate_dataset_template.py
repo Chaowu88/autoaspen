@@ -21,17 +21,14 @@ Input variable types are:
     xlsm for calculator variables
     bkp for Aspen non-Fortran variables
     bkp_fortran for Aspen Fortran variables
-    
-python C:\Users\cwu\Desktop\Software\Aspen_automation\Scripts\AutoAspen2\generate_dataset_template.py
+
+Usage
+python path\to\generate_dataset_template.py
 '''
 
 
-OUTPUT_FILE = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_3_FT\training\training_data.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_2_HEFA\training\training_data.xlsx' 
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_1_cellulosic\training\training_data.xlsx'
-CONFIG_FILE = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_3_FT\var_infos.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_2_HEFA\var_infos.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Data\AutoAspen_paper\case_1_cellulosic\var_infos.xlsx'
+OUTPUT_FILE = 'path\to\training\training_data.xlsx'
+CONFIG_FILE = 'path\to\var_infos.xlsx'
 NRUNS = 100
 
 
