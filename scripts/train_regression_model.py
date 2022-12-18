@@ -13,16 +13,13 @@ This script trains and tunes four machine learning model:
 3. random forest;
 4. gradient tree boosting
 
-python C:\Users\cwu\Desktop\Software\Aspen_automation\Scripts\AutoAspen2\train_regression_model.py
+Usage
+python path\to\train_regression_model.py
 '''
 
 
-OUT_DIR = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_3_FT\training'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_2_HEFA\training'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_1_cellulosic\training'
-DATA_FILE = r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_3_FT\training\training_data.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_2_HEFA\training\training_data.xlsx'
-#r'C:\Users\cwu\Desktop\Software\Aspen_automation\Results\AutoAspen_paper\case_1_cellulosic\training\training_data.xlsx'
+OUT_DIR = 'path\to\training'
+DATA_FILE = 'path\to\training\training_data.xlsx'
 METHODS = {'poly': 'polynomial ridge regression',
            'lsvm': 'linear SVM',
            'rf': 'random forest',
