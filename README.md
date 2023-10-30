@@ -7,7 +7,7 @@ AutoAspen is a comprehensive tool for conducting stochastic techno-economic anal
 
 3. Multivariate Uncertainty Analysis that allows users to modify a set of input variables simultaneously during a simulation.
 
-Dependencies:
+Prerequisites:
 AutoAspen has been developed and tested on Python 3.8 with the following dependencies: numpy 1.20.2, pandas 1.0.5, scipy 1.5.0, scikit-learn 0.23.1, matplotlib 3.2.2, seaborn 0.12.0, pillow 7.2.0, xlrd 1.2.0, pythoncom, and win32com.
 
 Usage:
