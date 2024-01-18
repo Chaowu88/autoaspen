@@ -1,35 +1,27 @@
-#!/usr/bin/env pyhton
-# -*- coding: UTF-8 -*-
-
-
-__author__ = 'Chao Wu'
-__date__ = '05/21/2021'
-
-
 r'''
-This script generates dataset template for training. Random values of the input variables are generated according to defined distributions in format of:
-    Distribution   Parameters
-    normal         mean,sd
-    alpha          a,loc,scale
-    Beta           a,b,loc,scale
-    gamma          a,loc,scale            
-    triangular     c,loc,scale
-    pareto         b,loc,scale
-    bernoulli      pl,ph          # prob. of low value, prob. of high value
+Creates a dataset template for training by generating random values for input variables 
+according to specified distributions with defined parameters.
+    
+Distribution Parameters:
+normal: mean, standard deviation (mean, sd)
+alpha: shape, location, scale (a, loc, scale)
+beta: shape, shape, location, scale (a, b, loc, scale)
+gamma: shape, location, scale (a, loc, scale)
+triang: shape, location, scale (c, loc, scale)
+pareto: shape, location, scale (b, loc, scale)
+bernoulli: probability of low value, probability of high value (pl, ph)
   
-Input variable types are:
-    xlsm for calculator variables
-    bkp for Aspen non-Fortran variables
-    bkp_fortran for Aspen Fortran variables
-
-Usage
+Input Variable Types:
+xlsm: Calculator variables
+bkp: Aspen non-Fortran variables
+bkp_fortran: Aspen Fortran variables
+    
+Usage:
 python path\to\generate_dataset_template.py
 '''
 
 
-OUTPUT_FILE = 'path\to\training\training_data.xlsx'
-CONFIG_FILE = 'path\to\var_infos.xlsx'
-NRUNS = 100
+__author__ = 'Chao Wu'
 
 
 import os
@@ -38,16 +30,24 @@ import pandas as pd
 from scipy import stats
 
 
+OUTPUT_FILE = 'path\to\training_data.xlsx'
+CONFIG_FILE = 'path\to\var_info.xlsx'
+NRUNS = 100
+
+
 def parse_config_file(config_file):
     '''
     Parameters
     ----------
     config_file: str
-        path of config file
+        Path to the configuration file.
     
     Returns
     -------
-    inputsInfo, outputInfo: df
+    inputsInfo: pd.DataFrame
+        A DataFrame containing the input information.
+    outputInfo: pd.DataFrame
+        A DataFrame containing the output information.
     '''
     
     configInfo = pd.read_excel(config_file, sheet_name = ['Inputs', 'Output'])
@@ -61,20 +61,22 @@ def generate_input_values(inputs_info, nruns):
     '''
     Parameters
     ----------
-    inputs_info: df
-        columns are ['Input variable', 'Type', 'Location', 'Bounds', 'Distribution', 'Parameters']
+    inputs_info: pd.DataFrame
+        A DataFrame containing information about the input variables with columns 
+        'Input variable', 'Type', 'Location', 'Bounds', 'Distribution' and 'Parameters'.
     nruns: int
-        # of runs
+        # of runs to generate.
     
     Returns
     -------
-    inputsValues: df
+    inputsValues: pd.DataFrame
+        A DataFrame containing the generated input values.
     '''
     
     inputsValues = pd.DataFrame(columns = ['Input variable', 'Type', 'Location', 'Values'])
     for _, [inputVar, varType, local, bnds, distName, params] in inputs_info.iterrows():
         
-        print('generating random values of %s' % inputVar)
+        print(f'generating random values of {inputVar}')
         
         lb, ub = map(float, bnds.split(','))
         dist = getattr(stats, distName)
@@ -113,11 +115,13 @@ def write_to_excel(out_file, inputs_values, output_info):
     Parameters
     ----------
     out_file: str
-        output file
-    inputs_values: df
-        columns are ['Input variable', 'Type', 'Location', 'Values']
-    output_info: df 
-        columns are ['Output variable', 'Location']
+        Path to the output file.
+    inputs_values: pd.DataFrame
+        A DataFrame containing information about the input values with columns 
+        'Input variable', 'Type', 'Location', and 'Values'.
+    output_info: pd.DataFrame 
+        A DataFrame containing information about the output variables with columns 
+        'Output variable', and 'Location'.
     '''
     
     outDir = os.path.dirname(out_file)

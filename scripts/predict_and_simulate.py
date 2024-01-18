@@ -1,32 +1,22 @@
-#!/usr/bin/env pyhton
-# -*- coding: UTF-8 -*-
-
-
-__author__ = 'Chao Wu'
-__date__ = '12/07/2022'
-
-
 r'''
-This script predicts output MSP using a trained regression model and performs:
-1. Sensitivity analysis with one query input;
-2. Response analysis with two query inputs;
-3. Monte Carlo simulation with three or more query inputs
+Predicts the output Minimum Selling Price (MSP) using a trained regression model and conducts 
+the following analyses:
+1. Sensitivity analysis with single query input.
+2. Response analysis with two query inputs.
+3. Monte Carlo simulation with three or more query inputs.
 
-NOTE
-1. Variable can be in format of "varname" or "varname (unit)";
-2. Variable name should be consistent in "xxx-input(s)" sheet and "baseline" sheet;
-3. Variable order in "baseline" sheet should be identical to that in the "Inputs" sheet of 
-   the config file to generate_dataset_template.py
+NOTES:
+1. Variables can be formatted as "varname" or "varname (unit)".
+2. Variable names must match between the "xxx-input(s)" sheet and the "baseline" sheet.
+3. The variable order in the "baseline" sheet should match that in the "Inputs" sheet of the 
+   generate_dataset_template.py config file.
 
-Usage
+Usage:
 python path\to\predict_and_simulate.py
 '''
 
 
-OUT_DIR = 'path\to\simulation\mlmethod'
-CONFIG_FILE = 'path\to\config.xlsx'
-MODEL_FILE = 'path\to\training\mlmethod\mlmethod.mod'
-LABEL = 'MFSP (\$ GGE$^{-1}$)'
+__author__ = 'Chao Wu'
 
 
 import os
@@ -43,24 +33,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+OUT_DIR = 'path\to\output'
+CONFIG_FILE = 'path\to\config.xlsx'
+MODEL_FILE = 'path\to\model.mod'
+LABEL = 'MFSP (\$ GGE$^{-1}$)'
+
+
 class BaseHandler:
-    '''
-    Parameters
-    ----------
-    config: df
-        columns are ['Input variable', 'Bounds', 'Distribution', 'Parameters', 'Size']
-    baseline: df
-        columns are ['Input variable', 'Baseline value']
-    '''
     
     def __init__(self, config, baseline):
         '''
         Parameters
         ----------
-        config: df
-            columns are ['Input variable', 'Bounds', 'Distribution', 'Parameters', 'Size']
-        baseline: df
-            columns are ['Input variable', 'Baseline value']
+        config: pd.DataFrame
+            A DataFrame containing the configuration for the random input samples with columns 
+            'Input variable', 'Bounds', 'Distribution', 'Parameters', and 'Size'.
+        baseline: pd.DataFrame
+            A DataFrame containing the baseline values for the input variables with columns 
+            'Input variable' and 'Baseline value'.
         '''
         
         self.config = config
@@ -73,17 +63,28 @@ class BaseHandler:
         Parameters
         ----------
         dist_name: str
-            distribution name
+            The name of the distribution to use to generate the random values. Supported 
+            distributions are: "normal", "alpha", "beta", "gamma", "triang", "pareto" and 
+            "bernoulli".
         size: int
-            # of random values to generate
+            The number of random values to generate.
         bounds: tuple
-            (lower bound, upper bound)
+            A tuple of two values, representing the lower and upper bounds of the 
+            random values.
         params: tuple
-            parameters of dist_name
+            A tuple of parameters for the specified distribution.
+                normal: mean, sd
+                alpha: a, loc, scale
+                beta: a, b, loc, scale
+                gamma: a, loc, scale
+                triang: c, loc, scale
+                pareto: b, loc, scale
+                bernoulli: pl, ph
         
         Returns
         -------
-        values: array
+        values: np.array
+            A NumPy array containing the generated random values.
         '''
         
         dist = getattr(stats, dist_name)
@@ -112,15 +113,20 @@ class BaseHandler:
         return values
 
     
-    def load_model(self, model_file):
+    def load_model(self, model_file, scaler_file = None):
         '''
         Parameters
         ----------
         model_file: str
-            model file
+            Path to the model file.
+        scaler_file: str or None
+            Path to the scaler file.
         '''
         
         self.model = load(model_file)
+
+        if scaler_file:
+            self.scaler = load(scaler_file)
         
         
     def simulate(self):
@@ -130,7 +136,11 @@ class BaseHandler:
         for singleInput in self.inputs:
             print(singleInput.name, ': simulating')
             
-            predicted = self.model.predict(singleInput.data)
+            if hasattr(self, 'scaler'):
+                inputData = self.scaler.transform(singleInput.data)
+            else:
+                inputData = singleInput.data
+            predicted = self.model.predict(inputData)
             
             singleOutput = Output(singleInput.name, predicted)
             self.outputs.append(singleOutput)
@@ -141,13 +151,14 @@ class BaseHandler:
         Parameters
         ----------
         out_dir: str
-            output directory
+            Path to the output directory.
         folder_name: str
-            folder name
+            Name of the folder containing the data to plot.
         label: str
-            label of xaxis
+            The label for the x-axis.
         percentile: float
-            in range of [0, 100], lines indicating percentile% and 1 - percentile% will be plotted
+            A value in the range [0, 100]. Lines indicating the percentile% and 
+            (100 - percentile)% will be plotted.
         '''
         
         for singleOutput in self.outputs:
@@ -157,20 +168,31 @@ class BaseHandler:
             values = singleOutput.values
             fileName = get_var_name(label)
             
-            saveDir = '%s/%s/%s' % (out_dir, folder_name, varName)
+            saveDir = f'{out_dir}/{folder_name}/{varName}'
             saveDir = make_dir(saveDir)
             
             fig, ax1 = plt.subplots()
-            sns.distplot(values, rug = True, kde = False, hist = True, ax = ax1,
-                         hist_kws = {'color': 'forestgreen'})
+            sns.distplot(
+                values, 
+                rug = True, 
+                kde = False, 
+                hist = True, 
+                ax = ax1,
+                hist_kws = {'color': 'forestgreen'}
+            )
             ax1.set_xlabel(label, fontsize = 20)
             ax1.set_ylabel('Count', color = 'forestgreen', fontsize = 20)
             ax1.tick_params(labelsize = 15)
             
             ax2 = ax1.twinx()
-            sns.distplot(values, rug = True, kde = True, hist = False, ax = ax2, 
-                         hist_kws = {'color': 'royalblue'}, kde_kws = {'linewidth': 2.5})   
-                         # if plot kde, y axis can not be Count
+            sns.distplot(
+                values, 
+                rug = True, 
+                kde = True, 
+                hist = False, 
+                ax = ax2, 
+                hist_kws = {'color': 'royalblue'}, kde_kws = {'linewidth': 2.5}
+            )   
             ax2.set_ylabel('')
             ax2.set_yticks([])
             ax2.spines['left'].set_visible(False)
@@ -178,15 +200,21 @@ class BaseHandler:
             ax2.spines['top'].set_visible(False)
             ax2.spines['bottom'].set_visible(False)
             
-            counts, edges = np.histogram(values, bins = int(values.size/10) if values.size > 20 else values.size)
+            bins = int(values.size/10) if values.size > 20 else values.size
+            counts, edges = np.histogram(values, bins = bins)
             x = (edges[:-1]+edges[1:])/2
             y = np.cumsum(counts)/np.sum(counts)
             p1, p2 = np.percentile(values, [percentile, 100-percentile])
             
             ax3 = ax1.twinx()
             ax3.plot(x, y, color = 'peru', linewidth = 2.5)
-            ax3.set_ylabel('Cumulative probabilty', color = 'peru', fontsize = 20, 
-                           labelpad = 25, rotation = 270)
+            ax3.set_ylabel(
+                'Cumulative probabilty', 
+                color = 'peru', 
+                fontsize = 20, 
+                labelpad = 25, 
+                rotation = 270
+            )
             ax3.tick_params(labelsize = 15)
 
             ax3.vlines(x = p1, ymin = 0, ymax = 0.97, linestyles = 'dashed', color = 'gray')
@@ -194,10 +222,10 @@ class BaseHandler:
             ax3.vlines(x = p2, ymin = 0, ymax = 0.97, linestyles = 'dashed', color = 'gray')
             ax3.text(x = p2, y = 1, s = round(p2, 2), transform = ax3.transData, ha = 'center')
             
-            fig.savefig('%s/%s.jpg' % (saveDir, fileName), dpi = 300, bbox_inches = 'tight')
+            fig.savefig(f'{saveDir}/{fileName}.jpg', dpi = 300, bbox_inches = 'tight')
             plt.close(fig = fig)
             
-            pd.Series(values).to_excel('%s/%s.xlsx' % (saveDir, fileName), header = False, index = False)
+            pd.Series(values).to_excel(f'{saveDir}/{fileName}.xlsx', header = False, index = False)
     
     
     def plot_contour_and_save(self, out_dir, folder_name, label):
@@ -205,11 +233,11 @@ class BaseHandler:
         Parameters
         ----------
         out_dir: str
-            output directory
+            Path to the output directory.
         folder_name: str
-            folder name
+            Name of the folder containing the data to plot.
         label: str
-            label of xaxis
+            The label for the x-axis.
         '''
         
         for singleInput, singleOutput in zip(self.inputs, self.outputs):
@@ -218,7 +246,7 @@ class BaseHandler:
             varName = get_var_name(singleOutput.name)
             fileName = get_var_name(label)
             
-            saveDir = '%s/%s/%s' % (out_dir, folder_name, varName)
+            saveDir = f'{out_dir}/{folder_name}/{varName}'
             saveDir = make_dir(saveDir)
             
             xvar, yvar = singleInput.name.split('_')
@@ -239,13 +267,19 @@ class BaseHandler:
             cbar.set_label(label, labelpad = 25, rotation = 270, fontsize = 20)
             
             if Z.max() - Z.min() > 0.001:    
-                ct = ax.contour(X, Y, Z, ctf.levels[1::6], colors = 'dimgray', linewidths = 1, linestyles ='dashed')
+                ct = ax.contour(
+                    X, Y, Z, 
+                    ctf.levels[1::6], 
+                    colors = 'dimgray', 
+                    linewidths = 1, 
+                    linestyles ='dashed'
+                )
                 ax.clabel(ct, ctf.levels[1::6], inline = True, fontsize = 10, colors = 'k')
             
-            fig.savefig('%s/%s.jpg' % (saveDir, fileName), dpi = 300, bbox_inches = 'tight')
+            fig.savefig(f'{saveDir}/{fileName}.jpg', dpi = 300, bbox_inches = 'tight')
             plt.close(fig = fig)
             
-            pd.DataFrame(Z).to_excel('%s/%s.xlsx' % (saveDir, fileName), header = xvar, index = yvar)
+            pd.DataFrame(Z).to_excel(f'{saveDir}/{fileName}.xlsx', header = xvar, index = yvar)
         
 
 class OneInputHandler(BaseHandler):
@@ -281,9 +315,9 @@ class OneInputHandler(BaseHandler):
         Parameters
         ----------
         out_dir: str
-            output directory
+            Path to the output directory.
         label: str
-            label of xaxis
+            The label for the x-axis.
         '''
         
         self.plot_hist_and_save(out_dir, 'one_input', label)
@@ -320,9 +354,9 @@ class TwoInputsHandler(BaseHandler):
         Parameters
         ----------
         out_dir: str
-            output directory
+            Path to the output directory.
         label: str
-            label of xaxis
+            The label for the x-axis.
         '''
         
         self.plot_contour_and_save(out_dir, 'two_input', label)
@@ -366,9 +400,9 @@ class MoreInputsHandler(BaseHandler):
         Parameters
         ----------
         out_dir: str
-            output directory
+            Path to the output directory.
         label: str
-            label of xaxis
+            The label for the x-axis.
         '''
         
         self.plot_hist_and_save(out_dir, 'more_input', label)
@@ -379,18 +413,25 @@ def parse_config_file(config_file):
     Parameters
     ----------
     config_file: str
-        path of config file. Note the order of variables in sheet Baseline should identical 
-        with the order of model features
+        Path to the configuration file. Note that the order of variables in "Baseline" sheet 
+        should be identical with the order of features used in model. 
     
     Returns
     -------
-    oneInput: df
-    twoInputs: df
-    moreInputs: df
-    baseline: df
+    oneInput: pd.DataFrame
+        A DataFrame containing the configuration for one input variable.
+    twoInputs: pd.DataFrame
+        A DataFrame containing the configuration for two input variables.
+    moreInputs: pd.DataFrame
+        A DataFrame containing the configuration for more than two input variables.
+    baseline: pd.DataFrame
+        A DataFrame containing the baseline values for the input variables.
     '''
     
-    configInfo = pd.read_excel(config_file, sheet_name = ['One-input', 'Two-inputs', 'More-inputs', 'Baseline'])
+    configInfo = pd.read_excel(
+        config_file, 
+        sheet_name = ['One-input', 'Two-inputs', 'More-inputs', 'Baseline']
+    )
     oneInput = configInfo['One-input']
     twoInputs = configInfo['Two-inputs']
     moreInputs = configInfo['More-inputs']
@@ -405,11 +446,12 @@ def get_var_name(name_with_unit):
     Parameters
     ----------
     name_with_unit: str
-        variable name with unit
+        Variable name with unit.
     
     Returns
     -------
     name: str
+        Variable name.
     '''
     
     name = re.sub(r'\s*\(.*?\)\s*', '', name_with_unit)
@@ -422,14 +464,15 @@ def correct_unit(name_with_unit):
     Parameters
     ----------
     name_with_unit: str
-        variable name with unit
+        Variable name with unit.
     
     Returns
     -------
     name_with_corr_unit: str
+        Variable name with correlated unit.
     '''    
 
-    name_with_unit = re.sub(r'\$', '\$', name_with_unit)   # escape '$'
+    name_with_unit = re.sub(r'\$', '\$', name_with_unit)   
     name_with_corr_unit = re.sub(r'\((.+)/(.+)\)', '(\g<1> \g<2>$^{-1}$)', name_with_unit)
 
     return name_with_corr_unit
@@ -440,7 +483,7 @@ def make_dir(directory):
     Parameters
     ----------
     directory: str
-        directory to make
+        Path to the directory to create.
     '''
     
     try:
@@ -463,7 +506,7 @@ if __name__ == '__main__':
     labels = ['one input variable', 'two input variables', 'more input variables']
     
     for config, Handler, label in zip(configs, Handlers, labels):
-        print('\nhandle %s:' % label)
+        print(f'\nhandle {label}:')
         
         if not config.empty:
             handler = Handler(config, baseline)

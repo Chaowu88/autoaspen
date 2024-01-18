@@ -1,24 +1,16 @@
-#!/usr/bin/env pyhton
-# -*- coding: UTF-8 -*-
-
-
-__author__ = 'Chao Wu'
-__date__ = '08/24/2022'
-
-
 r'''
-This script generates training dataset using Aspen model and .xslm calculator.
-If excel raise an error, try run the script again first. If no success, delete the inputs of the run in Values column,
-and try again.
+Generates a training dataset using the Aspen model and the .xslm calculator.
 
-Usage
+If an error occurs in Excel, begin by deleting the unsuccessful .bkp file and then attempt to 
+run the script again. If the issue persists, you can use the "delete_samples.py" script to 
+clear the input values in the "Values" column and then make another attempt.
+
+Usage:
 python path\to\generate_dataset.py
 '''
 
 
-DATASET_FILE = 'path\to\training\training_data.xlsx'
-ASPEN_FILE = 'path\to\aspenmodel.bkp'
-CALCULATOR_FILE = 'path\to\excel_calculator.xlsm'
+__author__ = 'Chao Wu'
 
 
 import os
@@ -30,20 +22,19 @@ from pythoncom import CoInitialize
 from win32com.client import DispatchEx
 
 
+DATASET_FILE = 'path\to\training_data.xlsx'
+ASPEN_FILE = 'path\to\aspen_model.bkp'
+CALCULATOR_FILE = r'path\to\calculator.xlsm'
+
+
 class Excel():
-    '''
-    Parameters
-    ----------
-    file: str
-        excel file
-    '''
 
     def __init__(self, excelFile):
         '''
         Parameters
         ----------
-        file: str
-            excel file
+        excelFile: str
+            Path to the Excel file.
         '''
         
         CoInitialize()
@@ -56,18 +47,20 @@ class Excel():
         Parameters
         ----------
         sheet: str
-            sheet name
-        loc: cell location
-            equivalent to col+row
+            Name of the sheet containing the cell.
+        loc: str
+            Location of the cell in Excel's A1 notation (e.g., "A1", "B2", "C3", etc.).
+            A cell location can be specified either by the loc argument or the row and col 
+            arguments.
         row: int or str
-            row index
+            Index of the row containing the cell.
         col: str
-            column index
+            Index of the column containing the cell.
         
         Returns
         -------
-        cellValue: num or str
-            cell value (after calculation)
+        cellValue: float or str
+            The value of the cell after calculation.    
         '''
         
         sht = self.excelBook.Worksheets(sheet)
@@ -85,16 +78,18 @@ class Excel():
         '''
         Parameters
         ----------
-        value: num or str
-            value to set
+        value: float or str
+            The value to write to the cell.
         sheet: str
-            sheet name
-        loc: cell location
-            equivalent to col+row
+            Name of the sheet containing the cell.
+        loc: str
+            Location of the cell in Excel's A1 notation (e.g., "A1", "B2", "C3", etc.).
+            A cell location can be specified either by the loc argument or the row and col 
+            arguments.
         row: int or str
-            row index
+            Index of the row containing the cell.
         col: str
-            column index
+            Index of the column containing the cell.
         '''
         
         sht = self.excelBook.Worksheets(sheet)
@@ -111,7 +106,7 @@ class Excel():
         Parameters
         ----------
         aspenFile: str
-            aspen file
+            Path to the Aspen Plus file.
         '''
         
         self.set_cell(aspenFile, 'Set-up', 'B1')
@@ -125,7 +120,7 @@ class Excel():
         Parameters
         ----------
         macro: str
-            macro
+            The name of the Excel macro to run.
         '''
             
         self.excelCOM.Run(macro)    
@@ -137,19 +132,13 @@ class Excel():
         
         
 class Aspen():
-    '''
-    Parameters
-    ----------
-    file: str
-        excel file
-        '''
 
     def __init__(self, aspenFile):
         '''
         Parameters
         ----------
-        file: str
-            excel file
+        aspenFile: str
+            Path to the Aspen Plus file.
         '''
         
         CoInitialize()
@@ -163,12 +152,12 @@ class Aspen():
         Parameters
         ----------
         aspenPath: str
-            path in ASPEN tree
+            Path to the node in the Aspen Plus tree.
         
         Returns
         -------
-        value: num or str
-            value in ASPEN tree node
+        value: float or str
+            The value of the node.
         '''
         
         value = self.COM.Tree.FindNode(aspenPath).Value
@@ -181,11 +170,11 @@ class Aspen():
         Parameters
         ----------
         aspenPath: str
-            path in ASPEN tree
+            Path to the node in the Aspen Plus tree.
         value: float or str
-            value to set
+            The value to write to the node.
         ifFortran: bool
-            whether it is a Fortran variable
+            Whether the node is a Fortran variable
         '''
         
         if ifFortran:
@@ -206,7 +195,7 @@ class Aspen():
         Parameters
         ----------
         saveFile: str
-            file name to save (.bkp)
+            The file name to save the Aspen Plus file (.bkp) to. 
         '''
     
         self.COM.SaveAs(saveFile)
@@ -222,12 +211,14 @@ def parse_data_file(data_file):
     Parameters
     ----------
     data_file: str
-        path of data file
+        Path to the data file.
     
     Returns
     -------
-    inputInfos: df
-    outputInfo: df
+    inputInfos: pd.DataFrame
+        A DataFrame containing the input information.
+    outputInfo: pd.DataFrame
+        A DataFrame containing the output information.
     '''
     
     dataInfo = pd.read_excel(data_file, sheet_name = ['Inputs', 'Output'])
@@ -242,15 +233,17 @@ def run_and_update(data_file, input_infos, output_info, aspen_file, calculator_f
     Parameters
     ----------
     data_file: str
-        dataset file
-    input_infos: df
-        columns are ['Input variable', 'Type', 'Location', 'Values']
-    output_info: df
-        columns are ['Output variable', 'Location', 'Values']
+        Path to the data file.
+    input_infos: pd.DataFrame
+        A DataFrame containing the input information with columns 'Input variable', 'Type', 
+        'Location', and 'Values'.
+    output_info: pd.DataFrame
+        A DataFrame containing the output information with columns 'Output variable', 
+        'Location', and 'Values'.
     aspen_file: str
-        Aspen model file
+        Path to the Aspen model file.
     calculator_file: str
-        .xslm calculator file
+        Path to the Excel calculator file.
     '''
     
     *others, values = output_info.squeeze()
@@ -275,9 +268,8 @@ def run_and_update(data_file, input_infos, output_info, aspen_file, calculator_f
     
     nrunsLeft = nruns - nrunsCompl
     if nrunsLeft > 0:
-        print('%s runs in total, %s runs left' % (nruns, nrunsLeft))
+        print(f'{nruns} runs in total, {nrunsLeft} runs left')
 
-        # run
         outDir = os.path.dirname(data_file)
         tmpDir = outDir + '/tmp'
         os.makedirs(tmpDir, exist_ok = True)
@@ -286,9 +278,8 @@ def run_and_update(data_file, input_infos, output_info, aspen_file, calculator_f
         calculator = Excel(calculator_file)
 
         for i in range(nrunsCompl, nruns):
-            print('run %s:' % (i+1))
+            print(f'run {i+1}:')
             
-            # set Aspen variables
             for inputInfo in inputInfos:
                 if inputInfo.type == 'bkp':
                     aspenModel.set_value(inputInfo.loc, inputInfo.values[i], False)   
@@ -297,13 +288,11 @@ def run_and_update(data_file, input_infos, output_info, aspen_file, calculator_f
                 else:
                     continue
 
-            # run Aspen model
             aspenModel.run_model()
             
-            tmpFile = '%s/%s.bkp' % (tmpDir, i)
+            tmpFile = f'{tmpDir}/{i}.bkp'
             aspenModel.save_model(tmpFile)
 
-            # set calculator variables
             for inputInfo in inputInfos:
                 if inputInfo.type == 'xlsm':
                     inputSheet, inputCell = inputInfo.loc.split('!')
@@ -311,7 +300,6 @@ def run_and_update(data_file, input_infos, output_info, aspen_file, calculator_f
                 else:
                     continue
             
-            # run calculator
             calculator.load_aspenModel(tmpFile)
             calculator.run_macro('solvedcfror')
             
@@ -319,10 +307,11 @@ def run_and_update(data_file, input_infos, output_info, aspen_file, calculator_f
             output = calculator.get_cell(outputSheet, loc = outputCell)
             outputInfo.values.append(output)
             
-            # update dataset
             outputValues = ','.join(map(str, outputInfo.values))
-            output_info = pd.DataFrame([[outputInfo.name, outputInfo.loc, outputValues]],
-                                       columns = ['Output variable', 'Location', 'Values'])
+            output_info = pd.DataFrame(
+                [[outputInfo.name, outputInfo.loc, outputValues]],
+                columns = ['Output variable', 'Location', 'Values']
+            )
             
             with pd.ExcelWriter(data_file) as writer:
                 input_infos.to_excel(writer, sheet_name = 'Inputs', index = False)
