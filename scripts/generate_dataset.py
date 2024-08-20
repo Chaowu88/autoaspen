@@ -128,7 +128,8 @@ class Excel():
             
     def close(self):
         
-        self.excelBook.Close(SaveChanges = 0)    
+        self.excelBook.Close(SaveChanges = 0)
+        self.excelCOM.Application.Quit()
         
         
 class Aspen():
@@ -316,7 +317,6 @@ def run_and_update(data_file, input_infos, output_info, aspen_file, calculator_f
             with pd.ExcelWriter(data_file) as writer:
                 input_infos.to_excel(writer, sheet_name = 'Inputs', index = False)
                 output_info.to_excel(writer, sheet_name = 'Output', index = False)
-                writer.save()
             
             print('done')
             
