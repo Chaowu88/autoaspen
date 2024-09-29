@@ -10,7 +10,7 @@ AutoAspen is a comprehensive tool for conducting stochastic techno-economic anal
 ## Prerequisites
 AutoAspen was developed and tested on Python 3.8 with the following dependencies: numpy 1.20.2, pandas 1.0.5, scipy 1.5.0, scikit-learn 0.23.1, matplotlib 3.2.2, seaborn 0.12.0, pillow 7.2.0, xlrd 1.2.0, openpyxl, pywin32.
 
-For AP V12 compatible version, please refer to [here](https://github.com/Chaowu88/autoaspen_APV12/tree/main).
+For the AP V12 compatible version, please refer to [this link](https://github.com/Chaowu88/autoaspen_APV12/tree/main).
 
 ## Usage
 1. `generate_dataset_template.py`: This script creates a dataset template for training by generating random values for input variables based on specified distributions defined in the `var_info` file. Supported distributions include: normal, alpha, beta, gamma, triangular, pareto, and bernoulli. A sample `var_info` file is provided [here](https://github.com/Chaowu88/autoaspen/blob/main/ATJ_pathway/var_info.xlsx).
