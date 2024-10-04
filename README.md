@@ -20,3 +20,6 @@ For the AP V12 compatible version, please refer to [this link](https://github.co
 3. `train_regression_model.py`: This script trains and fine-tunes four machine learning models. Users can select the best-performing model for Monte Carlo simulation. Supported machine learning models include: polynomial ridge regression, linear SVM, random forest, and gradient tree boosting.
 
 4. `predict_and_simulate.py`: This script predicts the MFSP using a trained regression model and conducts univariate, bivariate, or multivariate uncertainty analysis. The distributions and baseline values of input variables are specified in the [`config`](https://github.com/Chaowu88/autoaspen/blob/main/ATJ_pathway/config.xlsx) file.
+
+## Citation
+Chao Wu, Yuxi Wang, Ling Tao (2024) Machine Learning-Enabled Techno-Economic Uncertainty Analysis of Sustainable Aviation Fuel Production Pathways, Chemical Engineering Journal Advances. doi:[10.1016/j.ceja.2024.100650](https://doi.org/10.1016/j.ceja.2024.100650)
