@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 from pythoncom import CoInitialize
 from win32com.client import DispatchEx
+from time import sleep
 
 
 DATASET_FILE = 'path\to\training_data.xlsx'
@@ -122,7 +123,9 @@ class Excel():
         macro: str
             The name of the Excel macro to run.
         '''
-            
+
+        sleep(3)
+        
         self.excelCOM.Run(macro)    
         
             
